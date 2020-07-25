@@ -21,7 +21,11 @@
 #include "adc.h"
 
 /* USER CODE BEGIN 0 */
+#define ADC_BUFF_SIZE 500 //must be divided by 5
+#define ADC_CHANNELS 5
 
+static uint32_t AdcBuff[ADC_BUFF_SIZE] = {0};
+static uint32_t AdcAverageResult[ADC_CHANNELS] = {0};
 /* USER CODE END 0 */
 
 ADC_HandleTypeDef hadc;
@@ -56,7 +60,7 @@ void MX_ADC_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
-  sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -165,7 +169,49 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 } 
 
 /* USER CODE BEGIN 1 */
+void ADC_StartMeas(void)
+{
+	HAL_ADC_Start_DMA(&hadc, AdcBuff, ADC_BUFF_SIZE);
+}
 
+uint32_t ADC_GetChannel0(void)
+{
+	return AdcAverageResult[0];
+}
+
+uint32_t ADC_GetChannel1(void)
+{
+	return AdcAverageResult[1];
+}
+
+uint32_t ADC_GetChannel5(void)
+{
+	return AdcAverageResult[2];
+}
+
+uint32_t ADC_GetTemp(void)
+{
+	return AdcAverageResult[3];
+}
+
+uint32_t ADC_GetVref(void)
+{
+	return AdcAverageResult[4];
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	ADC_StartMeas();
+	uint64_t summ[ADC_CHANNELS]= {0};
+	for (uint16_t i=0; i<ADC_BUFF_SIZE; i++ )
+	{
+		summ[i % ADC_CHANNELS] += AdcBuff[i];
+	}
+	for (uint8_t i = 0; i < ADC_CHANNELS; i++)
+	{
+		AdcAverageResult[i] = summ[i] * ADC_CHANNELS / ADC_BUFF_SIZE;
+	}
+}
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

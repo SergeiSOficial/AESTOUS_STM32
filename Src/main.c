@@ -95,6 +95,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   TIM_StartGeneration();
   GPIO_EnableGen();
+  ADC_StartMeas();
   TIM_SetGenFreq(1000);
   /* USER CODE END 2 */
 
