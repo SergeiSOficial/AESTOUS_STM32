@@ -134,8 +134,6 @@ void ADC_StartMeas(void)
 	//HAL_ADC_Start_DMA(&hadc, AdcBuff, ADC_BUFF_SIZE);
 	HAL_ADC_Start(&hadc);
 	AdcAverageResult[0] = HAL_ADC_GetValue(&hadc);
-	HAL_ADC_Start(&hadc);
-	AdcAverageResult[1] = HAL_ADC_GetValue(&hadc);
 }
 
 uint32_t ADC_GetChannel0(void)
@@ -165,7 +163,7 @@ uint32_t ADC_GetVref(void)
 
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	uint64_t summ[ADC_CHANNELS]= {0};
+//	uint64_t summ[ADC_CHANNELS]= {0};
 //	for (uint16_t i=0; i<ADC_BUFF_SIZE; i++ )
 //	{
 //		summ[i % ADC_CHANNELS] += (uint16_t)*((uint16_t*)AdcBuff + i);
