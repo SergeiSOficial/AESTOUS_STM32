@@ -92,7 +92,7 @@ void MX_TIM17_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
+  sConfigOC.Pulse = 24000;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -221,8 +221,8 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 /* USER CODE BEGIN 1 */
 void TIM_StartGeneration(void)
 {
-//	HAL_TIM_Base_Start(&htim1);
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
+	HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);
 }
 
 void TIM_SetGenFreq(uint32_t hertz)
@@ -230,6 +230,12 @@ void TIM_SetGenFreq(uint32_t hertz)
 	uint32_t period = 48000000 / hertz;
 	TIM3->ARR = period;
 	TIM3->CCR4 = period/  2;
+}
+
+void TIM_SetPWMEnCounter(uint32_t counter)
+{
+	//max counter 48000
+	TIM17->CCR1 = counter;
 }
 /* USER CODE END 1 */
 

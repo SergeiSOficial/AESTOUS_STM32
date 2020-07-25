@@ -45,6 +45,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 /* USER CODE BEGIN Prototypes */
 void TIM_StartGeneration(void);
 void TIM_SetGenFreq(uint32_t hertz);
+void TIM_SetPWMEnCounter(uint32_t counter);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

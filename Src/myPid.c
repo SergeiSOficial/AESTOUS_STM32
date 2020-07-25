@@ -1,6 +1,6 @@
-#include "otherMy.h"
+#include "myPid.h"
 #include "math.h"
-
+#include <stdint.h>
 /*
 PID PERIOD TIME IN MAIN FILE (CONST VALUE IN HEADER, BASING ON TIMER INTERRUPT)!
 PID KOEFFICENT IN THIS FILE IN PID REGULATOR FUNCTION
