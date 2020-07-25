@@ -95,7 +95,6 @@ int main(void)
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
   TIM_StartGeneration();
-  //GPIO_EnableGen();
   TIM_SetGenFreq(1000);
   /* USER CODE END 2 */
   /* Infinite loop */
