@@ -21,7 +21,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
-#include "dma.h"
+#include "rtc.h"
 #include "tim.h"
 #include "gpio.h"
 
@@ -89,13 +89,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
   MX_ADC_Init();
   MX_TIM3_Init();
   MX_TIM17_Init();
+  MX_RTC_Init();
   /* USER CODE BEGIN 2 */
   TIM_StartGeneration();
-  GPIO_EnableGen();
+  //GPIO_EnableGen();
   ADC_StartMeas();
   TIM_SetGenFreq(1000);
   /* USER CODE END 2 */
@@ -108,6 +108,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 	  GPIO_Blink();
+	  ADC_StartMeas();
   }
   /* USER CODE END 3 */
 }
@@ -132,14 +133,18 @@ void SystemClock_Config(void)
     
   }
   LL_RCC_HSI_SetCalibTrimming(16);
-  LL_RCC_HSI14_Enable();
+  LL_RCC_LSI_Enable();
 
-   /* Wait till HSI14 is ready */
-  while(LL_RCC_HSI14_IsReady() != 1)
+   /* Wait till LSI is ready */
+  while(LL_RCC_LSI_IsReady() != 1)
   {
     
   }
-  LL_RCC_HSI14_SetCalibTrimming(16);
+  LL_PWR_EnableBkUpAccess();
+  LL_RCC_ForceBackupDomainReset();
+  LL_RCC_ReleaseBackupDomainReset();
+  LL_RCC_SetRTCClockSource(LL_RCC_RTC_CLKSOURCE_LSI);
+  LL_RCC_EnableRTC();
   LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSI, LL_RCC_PLL_MUL_6, LL_RCC_PREDIV_DIV_1);
   LL_RCC_PLL_Enable();
 
@@ -164,7 +169,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();  
   };
-  LL_RCC_HSI14_EnableADCControl();
 }
 
 /* USER CODE BEGIN 4 */

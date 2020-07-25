@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : dma.c
+  * File Name          : RTC.h
   * Description        : This file provides code for the configuration
-  *                      of all the requested memory to memory DMA transfers.
+  *                      of the RTC instances.
   ******************************************************************************
   * @attention
   *
@@ -16,42 +16,36 @@
   *
   ******************************************************************************
   */
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __rtc_H
+#define __rtc_H
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "dma.h"
+#include "main.h"
 
-/* USER CODE BEGIN 0 */
+/* USER CODE BEGIN Includes */
 
-/* USER CODE END 0 */
+/* USER CODE END Includes */
 
-/*----------------------------------------------------------------------------*/
-/* Configure DMA                                                              */
-/*----------------------------------------------------------------------------*/
+extern RTC_HandleTypeDef hrtc;
 
-/* USER CODE BEGIN 1 */
+/* USER CODE BEGIN Private defines */
 
-/* USER CODE END 1 */
+/* USER CODE END Private defines */
 
-/** 
-  * Enable DMA controller clock
-  */
-void MX_DMA_Init(void) 
-{
+void MX_RTC_Init(void);
 
-  /* Init with LL driver */
-  /* DMA controller clock enable */
-  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
+/* USER CODE BEGIN Prototypes */
 
-  /* DMA interrupt init */
-  /* DMA1_Channel1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+/* USER CODE END Prototypes */
 
+#ifdef __cplusplus
 }
-
-/* USER CODE BEGIN 2 */
-
-/* USER CODE END 2 */
+#endif
+#endif /*__ rtc_H */
 
 /**
   * @}

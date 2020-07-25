@@ -21,15 +21,15 @@
 #include "adc.h"
 
 /* USER CODE BEGIN 0 */
-#define ADC_BUFF_SIZE 500 //must be divided by 5
+#define ADC_BUFF_SIZE 10 //must be divided by 10
+#define ADC_BUFF_SIZE_UINT32 ADC_BUFF_SIZE/2 //must be divided by 5
 #define ADC_CHANNELS 5
 
-static uint32_t AdcBuff[ADC_BUFF_SIZE] = {0};
+static uint32_t AdcBuff[ADC_BUFF_SIZE_UINT32] = {0};
 static uint32_t AdcAverageResult[ADC_CHANNELS] = {0};
 /* USER CODE END 0 */
 
 ADC_HandleTypeDef hadc;
-DMA_HandleTypeDef hdma_adc;
 
 /* ADC init function */
 void MX_ADC_Init(void)
@@ -39,7 +39,7 @@ void MX_ADC_Init(void)
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
   */
   hadc.Instance = ADC1;
-  hadc.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hadc.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc.Init.Resolution = ADC_RESOLUTION_12B;
   hadc.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc.Init.ScanConvMode = ADC_SCAN_DIRECTION_FORWARD;
@@ -50,8 +50,8 @@ void MX_ADC_Init(void)
   hadc.Init.DiscontinuousConvMode = DISABLE;
   hadc.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc.Init.DMAContinuousRequests = ENABLE;
-  hadc.Init.Overrun = ADC_OVR_DATA_PRESERVED;
+  hadc.Init.DMAContinuousRequests = DISABLE;
+  hadc.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
   if (HAL_ADC_Init(&hadc) != HAL_OK)
   {
     Error_Handler();
@@ -60,7 +60,7 @@ void MX_ADC_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
-  sConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -68,27 +68,6 @@ void MX_ADC_Init(void)
   /** Configure for the selected ADC regular channel to be converted. 
   */
   sConfig.Channel = ADC_CHANNEL_1;
-  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure for the selected ADC regular channel to be converted. 
-  */
-  sConfig.Channel = ADC_CHANNEL_5;
-  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure for the selected ADC regular channel to be converted. 
-  */
-  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
-  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure for the selected ADC regular channel to be converted. 
-  */
-  sConfig.Channel = ADC_CHANNEL_VREFINT;
   if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -119,23 +98,6 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    /* ADC1 DMA Init */
-    /* ADC Init */
-    hdma_adc.Instance = DMA1_Channel1;
-    hdma_adc.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    hdma_adc.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_adc.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_adc.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-    hdma_adc.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-    hdma_adc.Init.Mode = DMA_NORMAL;
-    hdma_adc.Init.Priority = DMA_PRIORITY_LOW;
-    if (HAL_DMA_Init(&hdma_adc) != HAL_OK)
-    {
-      Error_Handler();
-    }
-
-    __HAL_LINKDMA(adcHandle,DMA_Handle,hdma_adc);
-
   /* USER CODE BEGIN ADC1_MspInit 1 */
 
   /* USER CODE END ADC1_MspInit 1 */
@@ -160,8 +122,6 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
     */
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_5);
 
-    /* ADC1 DMA DeInit */
-    HAL_DMA_DeInit(adcHandle->DMA_Handle);
   /* USER CODE BEGIN ADC1_MspDeInit 1 */
 
   /* USER CODE END ADC1_MspDeInit 1 */
@@ -171,7 +131,11 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 /* USER CODE BEGIN 1 */
 void ADC_StartMeas(void)
 {
-	HAL_ADC_Start_DMA(&hadc, AdcBuff, ADC_BUFF_SIZE);
+	//HAL_ADC_Start_DMA(&hadc, AdcBuff, ADC_BUFF_SIZE);
+	HAL_ADC_Start(&hadc);
+	AdcAverageResult[0] = HAL_ADC_GetValue(&hadc);
+	HAL_ADC_Start(&hadc);
+	AdcAverageResult[1] = HAL_ADC_GetValue(&hadc);
 }
 
 uint32_t ADC_GetChannel0(void)
@@ -199,19 +163,20 @@ uint32_t ADC_GetVref(void)
 	return AdcAverageResult[4];
 }
 
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	ADC_StartMeas();
 	uint64_t summ[ADC_CHANNELS]= {0};
-	for (uint16_t i=0; i<ADC_BUFF_SIZE; i++ )
-	{
-		summ[i % ADC_CHANNELS] += AdcBuff[i];
-	}
-	for (uint8_t i = 0; i < ADC_CHANNELS; i++)
-	{
-		AdcAverageResult[i] = summ[i] * ADC_CHANNELS / ADC_BUFF_SIZE;
-	}
+//	for (uint16_t i=0; i<ADC_BUFF_SIZE; i++ )
+//	{
+//		summ[i % ADC_CHANNELS] += (uint16_t)*((uint16_t*)AdcBuff + i);
+//	}
+//	for (uint8_t i = 0; i < ADC_CHANNELS; i++)
+//	{
+//		AdcAverageResult[i] = summ[i] * ADC_CHANNELS / ADC_BUFF_SIZE;
+//	}
+	//ADC_StartMeas();
 }
+
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
