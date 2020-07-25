@@ -102,27 +102,6 @@ float NTC_read(unsigned char termPosition)
   return result;
 }
 
-void peliter(unsigned char number, unsigned char rezim, unsigned int mosnost)
-{
-
-  if (number == 1)
-  {
-    if (rezim == 'n')
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET);
-    if (rezim == 'o')
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET);
-    TIM3->CCR3 = mosnost;
-  }
-
-  if (number == 2)
-  {
-    if (rezim == 'n')
-      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
-    if (rezim == 'o')
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10, GPIO_PIN_RESET);
-    TIM2->CCR3 = mosnost;
-  }
-}
 
 char PidBigBlock(float SetTemp)
 {
@@ -170,8 +149,8 @@ char PidBigBlock(float SetTemp)
     Integralnoe_proshloe = OgrINTo;
   // if (vozdeystvie_proshloe > VozdPr) vozdeystvie_proshloe = VozdPr;
 
-  peliter(1, 'n', (int)vozdeistvie);
-  peliter(2, 'n', (int)vozdeistvie);
+  // peliter(1, 'n', (int)vozdeistvie);
+  // peliter(2, 'n', (int)vozdeistvie);
 
   float module = 0.0;
   module = TemperatureBigBlockSet - TemperatureBigBlockReal;
