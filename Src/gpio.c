@@ -68,13 +68,13 @@ void MX_GPIO_Init(void)
 void GPIO_Blink(void)
 {
 	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_2);
-	HAL_Delay(500);
-	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_2);
-	HAL_Delay(500);
-	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_3);
-	HAL_Delay(500);
-	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_3);
-	HAL_Delay(500);
+//	HAL_Delay(500);
+//	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_2);
+//	HAL_Delay(500);
+//	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_3);
+//	HAL_Delay(500);
+//	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_3);
+//	HAL_Delay(500);
 }
 
 void GPIO_EnableGen(void)

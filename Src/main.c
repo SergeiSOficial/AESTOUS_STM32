@@ -97,6 +97,7 @@ int main(void)
   TIM_StartGeneration();
   TIM_SetGenFreq(1000);
   /* USER CODE END 2 */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -104,7 +105,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  GPIO_Blink();
+	  //GPIO_Blink();
 	  ADC_StartMeas();
   }
   /* USER CODE END 3 */
@@ -130,6 +131,14 @@ void SystemClock_Config(void)
     
   }
   LL_RCC_HSI_SetCalibTrimming(16);
+  LL_RCC_HSI14_Enable();
+
+   /* Wait till HSI14 is ready */
+  while(LL_RCC_HSI14_IsReady() != 1)
+  {
+    
+  }
+  LL_RCC_HSI14_SetCalibTrimming(16);
   LL_RCC_LSI_Enable();
 
    /* Wait till LSI is ready */
@@ -166,6 +175,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();  
   };
+  LL_RCC_HSI14_EnableADCControl();
 }
 
 /* USER CODE BEGIN 4 */
