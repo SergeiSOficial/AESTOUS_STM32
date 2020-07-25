@@ -92,6 +92,7 @@ int main(void)
   MX_DMA_Init();
   MX_ADC_Init();
   MX_TIM3_Init();
+  MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
   TIM_StartGeneration();
   GPIO_EnableGen();
