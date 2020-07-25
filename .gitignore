@@ -1,0 +1,6 @@
+Debug
+/Debug
+*.bin
+AiHi Debug.launch
+.settings/language.settings.xml
+.settings/org.eclipse.cdt.codan.core.prefs
