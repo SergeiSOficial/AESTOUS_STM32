@@ -27,6 +27,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "myPid.h"
 
 /* USER CODE END Includes */
 
@@ -47,6 +48,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+volatile static float TestTemp = 0.0;
 
 /* USER CODE END PV */
 
@@ -106,6 +108,8 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	  GPIO_Blink();
 	  ADC_StartMeas();
+	  TestTemp = NTC_read(1);
+
   }
   /* USER CODE END 3 */
 }

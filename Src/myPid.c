@@ -1,6 +1,7 @@
 #include "myPid.h"
 #include "math.h"
 #include <stdint.h>
+
 /*
 PID PERIOD TIME IN MAIN FILE (CONST VALUE IN HEADER, BASING ON TIMER INTERRUPT)!
 PID KOEFFICENT IN THIS FILE IN PID REGULATOR FUNCTION
@@ -61,12 +62,22 @@ float NTC_read(unsigned char termPosition)
 {
 
   uint32_t all_summ = 0;
+  int b = 0;
+
   float result = 0;
 
   switch (termPosition)
   {
   case 1:
-    result = ADC_GetChannel0();
+    //result = ADC_GetChannel0();
+
+
+    while (b<1000){
+     result += ADC_GetChannel0();
+     b++;
+    }
+    result = result/1000.0;
+
     break;
   case 2:
     result = ADC_GetChannel1();
@@ -85,7 +96,8 @@ float NTC_read(unsigned char termPosition)
     break;
   }
 
-  float resistance_ntc = 4095 - result / result; 
+  //float resistance_ntc = 4095 - result / result;
+  float resistance_ntc = ((result * 5.1) / (4095 - result)) * 1.0 + 0.0;
   float b25100RealCoef = resistance_ntc / 10.0;
   int i = 0;
   while (termistor[i][1] > b25100RealCoef)
