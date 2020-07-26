@@ -21,7 +21,7 @@
 #include "rtc.h"
 
 /* USER CODE BEGIN 0 */
-
+#include "myPid.h"
 /* USER CODE END 0 */
 
 RTC_HandleTypeDef hrtc;
@@ -135,6 +135,7 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 {
   /* Turn LED3 on: Alarm generation */
 	GPIO_Blink();
+	PidBigBlock(46.0);
 }
 /* USER CODE END 1 */
 

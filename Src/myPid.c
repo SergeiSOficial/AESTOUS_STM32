@@ -1,10 +1,14 @@
 #include "myPid.h"
 #include "math.h"
 #include <stdint.h>
+#include <stdlib.h>
+#include "tim.h"
 /*
 PID PERIOD TIME IN MAIN FILE (CONST VALUE IN HEADER, BASING ON TIMER INTERRUPT)!
 PID KOEFFICENT IN THIS FILE IN PID REGULATOR FUNCTION
 */
+
+
 
 const float termistor[43][3] = {
     {-55.0, 96.3, 7.4},
@@ -62,11 +66,17 @@ float NTC_read(unsigned char termPosition)
 
   uint32_t all_summ = 0;
   float result = 0;
+  int b = 0;
 
   switch (termPosition)
   {
   case 1:
-    result = ADC_GetChannel0();
+	while (b<1000) {
+    result += ADC_GetChannel0();
+    b++;
+	}
+	result = result / 1000;
+
     break;
   case 2:
     result = ADC_GetChannel1();
@@ -85,7 +95,15 @@ float NTC_read(unsigned char termPosition)
     break;
   }
 
-  float resistance_ntc = 4095 - result / result; 
+  //float resistance_ntc = 4095 - result / result;
+  //protection for 0 division
+  float resistance_ntc = 0.0;
+  if (result != 4095)
+  {
+	  resistance_ntc = ((result * 5.1) / (4095 - result)) * 1.0 + 0.0;
+  }
+
+
   float b25100RealCoef = resistance_ntc / 10.0;
   int i = 0;
   while (termistor[i][1] > b25100RealCoef)
@@ -102,12 +120,27 @@ float NTC_read(unsigned char termPosition)
   return result;
 }
 
+void freqPower(int power) {
+	float compute_freq = 0.0;
+	compute_freq = 2000 * powf((1000-(float)power)/90,2.1);
+
+    if (compute_freq < 2000) {
+    	compute_freq = 2000;
+    }
+
+    if (compute_freq > 300000) {
+    	compute_freq = 300000;
+    }
+
+	TIM_SetGenFreq((int)compute_freq);
+}
 
 char PidBigBlock(float SetTemp)
 {
 
-  static float TemperatureBigBlockReal;
-  static float TemperatureBigBlockSet = 0;
+  static float TemperatureBigBlockReal = 0.0;
+  static float TemperatureBigBlockSet = 0.0;
+
   static int first_call = 'y';
   if (SetTemp != TemperatureBigBlockSet)
   {
@@ -115,7 +148,7 @@ char PidBigBlock(float SetTemp)
     TemperatureBigBlockSet = SetTemp;
   }
 
-  static float vozdeistvie, Integralnoe_proshloe, Kp = 29, Ki = 5, Kd = 9, Oshibka, proshlOhibka; // vozdeystvie_proshloe
+  static float vozdeistvie = 0, Integralnoe_proshloe = 0, Kp = 30, Ki = 10, Kd = 3, Oshibka = 0, proshlOhibka = 0; // vozdeystvie_proshloe
   if (first_call == 'y')
   {
     first_call = 'n';
@@ -134,12 +167,12 @@ char PidBigBlock(float SetTemp)
 
   if (vozdeistvie < 0)
     vozdeistvie = 0; // Output LIMITS (Lower SIDE)  max 1000
-  if (vozdeistvie >= 700)
-    vozdeistvie = 500; // Output LIMIT (Upper SIDE)   max 1000
+  if (vozdeistvie >= 1000)
+    vozdeistvie = 1000; // Output LIMIT (Upper SIDE)   max 1000
 
   // vozdeystvie_proshloe = vozdeistvie;                        //
 
-  int OgrINT = 150; // MAX error summ (Integral part)
+  int OgrINT = 750; // MAX error summ (Integral part)
   int OgrINTo = 0;  // LOW error summ (Integral part)
                     // int VozdPr = vozdeistvie;
 
@@ -147,11 +180,16 @@ char PidBigBlock(float SetTemp)
     Integralnoe_proshloe = OgrINT;
   if (Integralnoe_proshloe < OgrINTo)
     Integralnoe_proshloe = OgrINTo;
+
+  freqPower(vozdeistvie);
+  //TIM_SetGenFreq(vozdeistvie*48);
+  TIM_SetPWMEnCounter(1000*48);
+
   // if (vozdeystvie_proshloe > VozdPr) vozdeystvie_proshloe = VozdPr;
 
   // peliter(1, 'n', (int)vozdeistvie);
   // peliter(2, 'n', (int)vozdeistvie);
-
+/*
   float module = 0.0;
   module = TemperatureBigBlockSet - TemperatureBigBlockReal;
   module = abs(module);
@@ -164,4 +202,5 @@ char PidBigBlock(float SetTemp)
   {
     return 'N';
   }
+  */
 }
